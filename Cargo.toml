@@ -8,6 +8,7 @@ edition = "2021"
 [dependencies]
 comrak = {version = "0.19.0", default-features = false, features = ["syntect"] }
 maud = "0.25.0"
+paste = "1.0.14"
 serde = "1.0.193"
 strum = "0.25.0"
 strum_macros = "0.25.3"
