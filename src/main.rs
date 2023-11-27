@@ -4,31 +4,198 @@ use std::fmt;
 use std::io::Write;
 use std::path::{Path, PathBuf};
 
+use comrak::plugins::syntect::SyntectAdapter;
 use comrak::{markdown_to_html_with_plugins, Options, Plugins};
 use maud::{html, Markup};
-
-use comrak::plugins::syntect::SyntectAdapter;
+use strum::VariantNames;
+use strum_macros::{EnumVariantNames, IntoStaticStr};
 
 mod fs;
-mod icon;
 mod render;
 
-use icon::Icon;
+// cannot be moved into separate module, as that would siable dead code
+// detection (as it would need to be public)
+#[derive(IntoStaticStr, EnumVariantNames, Clone)]
+#[cfg_attr(debug_assertions, allow(dead_code))]
+#[cfg_attr(not(debug_assertions), deny(dead_code))]
+enum Icon {
+    Ansible,
+    Apache,
+    ArchLinux,
+    AwsEc2,
+    AwsEcs,
+    AwsEfs,
+    AwsIam,
+    AwsLambda,
+    AwsRds,
+    AwsRoute53,
+    AwsS3,
+    AwsVpc,
+    Aws,
+    Backblaze,
+    Bash,
+    Bulma,
+    C,
+    Cadvisor,
+    Centos,
+    Ceph,
+    Checkmk,
+    CloudDownload,
+    Container,
+    Containerd,
+    CriO,
+    Csharp,
+    Css,
+    Debian,
+    Digitalocean,
+    Django,
+    Docker,
+    Dovecot,
+    Drone,
+    Elasticsearch,
+    Elm,
+    Email,
+    Fedora,
+    Flask,
+    Foreman,
+    Freebsd,
+    Gears,
+    Git,
+    Github,
+    Gitlab,
+    Gnupg,
+    Go,
+    Grafana,
+    Haproxy,
+    Helm,
+    Hetzner,
+    Html5,
+    Hugo,
+    Influx,
+    Jaeger,
+    Java,
+    Javascript,
+    Jenkins,
+    Jira,
+    Keybase,
+    Keycloak,
+    Kibana,
+    Kubernetes,
+    Latex,
+    Letsencrypt,
+    Libvirt,
+    Linkedin,
+    Logstash,
+    Lxc,
+    MagnifyingGlass,
+    Mongodb,
+    Mysql,
+    Neovim,
+    Network,
+    Nginx,
+    Nmap,
+    Oauth,
+    Oci,
+    OpenidConnect,
+    Openresty,
+    Openstack,
+    Opentelemetry,
+    Openvpn,
+    Openzfs,
+    Opsgenie,
+    Ovirt,
+    Packer,
+    Pfsense,
+    Php,
+    Postfix,
+    Postgresql,
+    Prometheus,
+    Pulumi,
+    Puppet,
+    Python,
+    Qemu,
+    Rancher,
+    Reactjs,
+    Redis,
+    Rss,
+    Ruby,
+    Rundeck,
+    Rust,
+    Saltstack,
+    Shield,
+    Sqlite,
+    Svelte,
+    Swagger,
+    Systemd,
+    Terraform,
+    Typescript,
+    Ubuntu,
+    Vagrant,
+    VisualStudioCode,
+    Wireshark,
+}
 
-const FULLNAME: &'static str = "Hannes Körber";
+impl Icon {
+    pub fn filename(&self) -> String {
+        <Self as Into<&'static str>>::into(self.clone()).to_owned() + ".svg"
+    }
 
-#[derive(Deserialize, Clone)]
-struct Tag(String);
+    pub fn path(&self, output_base_path: &Path) -> String {
+        let output_path = output_base_path.join("icons").join(self.filename());
 
-#[derive(Deserialize, Clone)]
-#[serde(deny_unknown_fields)]
-struct Frontmatter {
-    title: String,
-    #[serde(with = "time::serde::rfc3339", rename = "date")]
-    timestamp: time::OffsetDateTime,
-    summary: String,
-    #[allow(dead_code)]
-    tags: Vec<Tag>,
+        let local_path = Path::new("static/icons").join(self.filename());
+        if !local_path.exists() {
+            panic!("icon at {local_path:?} does not exist")
+        }
+        output_path.to_str().unwrap().to_owned()
+    }
+}
+
+enum UnusedIconFiles {
+    Allow,
+    Deny,
+}
+
+struct IconsUnverified;
+
+impl IconsUnverified {
+    pub fn verify_all(allow_unused: UnusedIconFiles) -> IconsVerified {
+        for icon in Icon::VARIANTS {
+            let local_path = Path::new("static/icons").join(format!("{icon}.svg"));
+            if !local_path.exists() {
+                panic!("icon at {local_path:?} does not exist")
+            }
+        }
+
+        if let UnusedIconFiles::Deny = allow_unused {
+            let filenames: Vec<String> = Icon::VARIANTS
+                .iter()
+                .map(|icon| format!("{icon}.svg"))
+                .collect();
+
+            for local_file in std::fs::read_dir("static/icons").unwrap().map(|entry| {
+                let entry = entry.unwrap();
+                if !entry.metadata().unwrap().is_file() {
+                    panic!("not a file: {entry:?}")
+                }
+                entry.file_name().into_string().unwrap()
+            }) {
+                if !filenames.contains(&local_file) {
+                    panic!("superfluous icon file {local_file:?}")
+                }
+            }
+        }
+
+        IconsVerified(())
+    }
+}
+
+struct IconsVerified(());
+
+impl IconsVerified {
+    pub fn copy_all(self, output_base_path: &Path) {
+        fs::copy_dir_all("./static/icons", output_base_path.join("icons")).unwrap();
+    }
 }
 
 struct Certification {
@@ -47,6 +214,517 @@ fn certifications(output_base_path: &Path) -> Vec<Certification> {
             .unwrap()
             .to_owned(),
     }]
+}
+
+struct Social {
+    name: &'static str,
+    link: String,
+    icon: Icon,
+    description: Option<&'static str>,
+}
+
+fn socials(output_base_path: &Path) -> Vec<Social> {
+    vec![
+        Social {
+            name: "Github",
+            link: "https://github.com/hakoerber".into(),
+            icon: Icon::Github,
+            description: None,
+        },
+        Social {
+            name: "Linkedin",
+            link: "https://www.linkedin.com/in/hannes-koerber".into(),
+            icon: Icon::Linkedin,
+            description: None,
+        },
+        Social {
+            name: "Keybase",
+            link: "https://keybase.io/hakoerber".into(),
+            icon: Icon::Keybase,
+            description: None,
+        },
+        Social {
+            name: "E-Mail",
+            link: "mailto:hannes.koerber@gmail.com".into(),
+            icon: Icon::Email,
+            description: Some("Send me an e-mail"),
+        },
+        Social {
+            name: "RSS",
+            link: output_base_path
+                .join("rss.xml")
+                .to_str()
+                .unwrap()
+                .to_owned(),
+            icon: Icon::Rss,
+            description: Some("Follow my blog on RSS"),
+        },
+    ]
+}
+
+enum TechLevel {
+    Pro,
+    Normal,
+}
+
+impl fmt::Display for TechLevel {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "{}",
+            match self {
+                Self::Pro => "pro",
+                Self::Normal => "normal",
+            }
+        )
+    }
+}
+
+struct Technology {
+    name: &'static str,
+    level: TechLevel,
+    icon: Icon,
+}
+
+struct TechCategory {
+    name: &'static str,
+    technologies: Vec<Technology>,
+}
+
+fn tech_categories() -> Vec<TechCategory> {
+    vec![
+        TechCategory {
+            name: "Containerization",
+            technologies: vec![
+                Technology {
+                    name: "Kubernetes",
+                    level: TechLevel::Pro,
+                    icon: Icon::Kubernetes,
+                },
+                Technology {
+                    name: "Docker",
+                    level: TechLevel::Pro,
+                    icon: Icon::Docker,
+                },
+                Technology {
+                    name: "cri-o",
+                    level: TechLevel::Normal,
+                    icon: Icon::CriO,
+                },
+                Technology {
+                    name: "Containerd",
+                    level: TechLevel::Normal,
+                    icon: Icon::Containerd,
+                },
+                Technology {
+                    name: "OCI",
+                    level: TechLevel::Normal,
+                    icon: Icon::Oci,
+                },
+                Technology {
+                    name: "Rancher",
+                    level: TechLevel::Normal,
+                    icon: Icon::Rancher,
+                },
+            ],
+        },
+        TechCategory {
+            name: "Databases",
+            technologies: vec![
+                Technology {
+                    name: "PostgreSQL",
+                    level: TechLevel::Pro,
+                    icon: Icon::Postgresql,
+                },
+                Technology {
+                    name: "ElasticSearch",
+                    level: TechLevel::Pro,
+                    icon: Icon::Elasticsearch,
+                },
+                Technology {
+                    name: "MySQL",
+                    level: TechLevel::Pro,
+                    icon: Icon::Mysql,
+                },
+                Technology {
+                    name: "Redis",
+                    level: TechLevel::Normal,
+                    icon: Icon::Redis,
+                },
+                Technology {
+                    name: "InfluxDB",
+                    level: TechLevel::Normal,
+                    icon: Icon::Influx,
+                },
+                Technology {
+                    name: "SQLite",
+                    level: TechLevel::Normal,
+                    icon: Icon::Sqlite,
+                },
+            ],
+        },
+        TechCategory {
+            name: "Configuration Management",
+            technologies: vec![
+                Technology {
+                    name: "Terraform",
+                    level: TechLevel::Pro,
+                    icon: Icon::Terraform,
+                },
+                Technology {
+                    name: "Ansible",
+                    level: TechLevel::Pro,
+                    icon: Icon::Ansible,
+                },
+                Technology {
+                    name: "Pulumi",
+                    level: TechLevel::Pro,
+                    icon: Icon::Pulumi,
+                },
+                Technology {
+                    name: "Packer",
+                    level: TechLevel::Normal,
+                    icon: Icon::Packer,
+                },
+                Technology {
+                    name: "Puppet",
+                    level: TechLevel::Normal,
+                    icon: Icon::Puppet,
+                },
+                Technology {
+                    name: "SaltStack",
+                    level: TechLevel::Normal,
+                    icon: Icon::Saltstack,
+                },
+            ],
+        },
+        TechCategory {
+            name: "Web Development",
+            technologies: vec![
+                Technology {
+                    name: "HTML",
+                    level: TechLevel::Pro,
+                    icon: Icon::Html5,
+                },
+                Technology {
+                    name: "CCS",
+                    level: TechLevel::Pro,
+                    icon: Icon::Css,
+                },
+                Technology {
+                    name: "JavaScript",
+                    level: TechLevel::Normal,
+                    icon: Icon::Javascript,
+                },
+                Technology {
+                    name: "Flask",
+                    level: TechLevel::Normal,
+                    icon: Icon::Flask,
+                },
+                Technology {
+                    name: "Svelte",
+                    level: TechLevel::Normal,
+                    icon: Icon::Svelte,
+                },
+                Technology {
+                    name: "ReactJS",
+                    level: TechLevel::Normal,
+                    icon: Icon::Reactjs,
+                },
+            ],
+        },
+        TechCategory {
+            name: "Programming",
+            technologies: vec![
+                Technology {
+                    name: "Python",
+                    level: TechLevel::Pro,
+                    icon: Icon::Python,
+                },
+                Technology {
+                    name: "Rust",
+                    level: TechLevel::Pro,
+                    icon: Icon::Rust,
+                },
+                Technology {
+                    name: "Go",
+                    level: TechLevel::Pro,
+                    icon: Icon::Go,
+                },
+                Technology {
+                    name: "TypeScript",
+                    level: TechLevel::Normal,
+                    icon: Icon::Typescript,
+                },
+                Technology {
+                    name: "Bash",
+                    level: TechLevel::Normal,
+                    icon: Icon::Bash,
+                },
+                Technology {
+                    name: "C",
+                    level: TechLevel::Normal,
+                    icon: Icon::C,
+                },
+            ],
+        },
+        TechCategory {
+            name: "Observability",
+            technologies: vec![
+                Technology {
+                    name: "Prometheus",
+                    level: TechLevel::Pro,
+                    icon: Icon::Prometheus,
+                },
+                Technology {
+                    name: "Grafana",
+                    level: TechLevel::Pro,
+                    icon: Icon::Grafana,
+                },
+                Technology {
+                    name: "Kibana",
+                    level: TechLevel::Normal,
+                    icon: Icon::Kibana,
+                },
+                Technology {
+                    name: "OpsGenie",
+                    level: TechLevel::Normal,
+                    icon: Icon::Opsgenie,
+                },
+                Technology {
+                    name: "OpenTelemetry",
+                    level: TechLevel::Normal,
+                    icon: Icon::Opentelemetry,
+                },
+                Technology {
+                    name: "Jaeger",
+                    level: TechLevel::Normal,
+                    icon: Icon::Jaeger,
+                },
+            ],
+        },
+        TechCategory {
+            name: "Development",
+            technologies: vec![
+                Technology {
+                    name: "Git",
+                    level: TechLevel::Pro,
+                    icon: Icon::Git,
+                },
+                Technology {
+                    name: "Neovim",
+                    level: TechLevel::Pro,
+                    icon: Icon::Neovim,
+                },
+                Technology {
+                    name: "GitLab",
+                    level: TechLevel::Normal,
+                    icon: Icon::Gitlab,
+                },
+                Technology {
+                    name: "GitHub",
+                    level: TechLevel::Normal,
+                    icon: Icon::Github,
+                },
+                Technology {
+                    name: "OpenAPI",
+                    level: TechLevel::Normal,
+                    icon: Icon::Swagger,
+                },
+                Technology {
+                    name: "Jira",
+                    level: TechLevel::Normal,
+                    icon: Icon::Jira,
+                },
+            ],
+        },
+        TechCategory {
+            name: "Automation",
+            technologies: vec![
+                Technology {
+                    name: "Drone",
+                    level: TechLevel::Pro,
+                    icon: Icon::Drone,
+                },
+                Technology {
+                    name: "GitLab CI",
+                    level: TechLevel::Pro,
+                    icon: Icon::Gitlab,
+                },
+                Technology {
+                    name: "Jenkins",
+                    level: TechLevel::Normal,
+                    icon: Icon::Jenkins,
+                },
+            ],
+        },
+        TechCategory {
+            name: "Cloud Providers",
+            technologies: vec![
+                Technology {
+                    name: "AWS",
+                    level: TechLevel::Pro,
+                    icon: Icon::Aws,
+                },
+                Technology {
+                    name: "DigitalOcean",
+                    level: TechLevel::Normal,
+                    icon: Icon::Digitalocean,
+                },
+                Technology {
+                    name: "Hetzner",
+                    level: TechLevel::Normal,
+                    icon: Icon::Hetzner,
+                },
+            ],
+        },
+        TechCategory {
+            name: "Web Servers",
+            technologies: vec![
+                Technology {
+                    name: "Nginx",
+                    level: TechLevel::Pro,
+                    icon: Icon::Nginx,
+                },
+                Technology {
+                    name: "Apache",
+                    level: TechLevel::Normal,
+                    icon: Icon::Apache,
+                },
+                Technology {
+                    name: "HAProxy",
+                    level: TechLevel::Normal,
+                    icon: Icon::Haproxy,
+                },
+                Technology {
+                    name: "OpenResty",
+                    level: TechLevel::Normal,
+                    icon: Icon::Openresty,
+                },
+            ],
+        },
+        TechCategory {
+            name: "Operating Systems",
+            technologies: vec![
+                Technology {
+                    name: "CentOS",
+                    level: TechLevel::Pro,
+                    icon: Icon::Centos,
+                },
+                Technology {
+                    name: "Debian",
+                    level: TechLevel::Pro,
+                    icon: Icon::Debian,
+                },
+                Technology {
+                    name: "Arch Linux",
+                    level: TechLevel::Pro,
+                    icon: Icon::ArchLinux,
+                },
+                Technology {
+                    name: "Ubuntu",
+                    level: TechLevel::Normal,
+                    icon: Icon::Ubuntu,
+                },
+                Technology {
+                    name: "Fedora",
+                    level: TechLevel::Normal,
+                    icon: Icon::Fedora,
+                },
+                Technology {
+                    name: "FreeBSD",
+                    level: TechLevel::Normal,
+                    icon: Icon::Freebsd,
+                },
+            ],
+        },
+        TechCategory {
+            name: "Security",
+            technologies: vec![
+                Technology {
+                    name: "Keycloak",
+                    level: TechLevel::Pro,
+                    icon: Icon::Keycloak,
+                },
+                Technology {
+                    name: "OpenID Connect",
+                    level: TechLevel::Pro,
+                    icon: Icon::OpenidConnect,
+                },
+                Technology {
+                    name: "GnuPG",
+                    level: TechLevel::Normal,
+                    icon: Icon::Gnupg,
+                },
+                Technology {
+                    name: "Let's Encrypt",
+                    level: TechLevel::Normal,
+                    icon: Icon::Letsencrypt,
+                },
+                Technology {
+                    name: "Wireshark",
+                    level: TechLevel::Normal,
+                    icon: Icon::Wireshark,
+                },
+                Technology {
+                    name: "OpenVPN",
+                    level: TechLevel::Normal,
+                    icon: Icon::Openvpn,
+                },
+            ],
+        },
+        TechCategory {
+            name: "Virtualization",
+            technologies: vec![
+                Technology {
+                    name: "Libvirt / KVM",
+                    level: TechLevel::Pro,
+                    icon: Icon::Libvirt,
+                },
+                Technology {
+                    name: "Vagrant",
+                    level: TechLevel::Pro,
+                    icon: Icon::Vagrant,
+                },
+                Technology {
+                    name: "Qemu",
+                    level: TechLevel::Normal,
+                    icon: Icon::Qemu,
+                },
+            ],
+        },
+        TechCategory {
+            name: "Storage",
+            technologies: vec![
+                Technology {
+                    name: "Ceph",
+                    level: TechLevel::Pro,
+                    icon: Icon::Ceph,
+                },
+                Technology {
+                    name: "ZFS",
+                    level: TechLevel::Normal,
+                    icon: Icon::Openzfs,
+                },
+            ],
+        },
+    ]
+}
+
+const FULLNAME: &str = "Hannes Körber";
+
+#[derive(Deserialize, Clone)]
+struct Tag(String);
+
+#[derive(Deserialize, Clone)]
+#[serde(deny_unknown_fields)]
+struct Frontmatter {
+    title: String,
+    #[serde(with = "time::serde::rfc3339", rename = "date")]
+    timestamp: time::OffsetDateTime,
+    summary: String,
+    #[allow(dead_code)]
+    tags: Vec<Tag>,
 }
 
 fn frame(output_base_path: &Path, title: &str, inner: Markup) -> Markup {
@@ -84,50 +762,6 @@ fn frame(output_base_path: &Path, title: &str, inner: Markup) -> Markup {
         },
     ];
 
-    struct Social {
-        name: &'static str,
-        link: String,
-        icon: Icon,
-        description: Option<&'static str>,
-    }
-
-    let socials = [
-        Social {
-            name: "Github",
-            link: "https://github.com/hakoerber".into(),
-            icon: Icon::Github,
-            description: None,
-        },
-        Social {
-            name: "Linkedin",
-            link: "https://www.linkedin.com/in/hannes-koerber".into(),
-            icon: Icon::Linkedin,
-            description: None,
-        },
-        Social {
-            name: "Keybase",
-            link: "https://keybase.io/hakoerber".into(),
-            icon: Icon::Keybase,
-            description: None,
-        },
-        Social {
-            name: "E-Mail",
-            link: "mailto:hannes.koerber@gmail.com".into(),
-            icon: Icon::Email,
-            description: Some("Send me an e-mail"),
-        },
-        Social {
-            name: "RSS",
-            link: output_base_path
-                .join("rss.xml")
-                .to_str()
-                .unwrap()
-                .to_owned(),
-            icon: Icon::Rss,
-            description: Some("Follow my blog on RSS"),
-        },
-    ];
-
     let output = html!(
         (maud::DOCTYPE)
         html {
@@ -161,12 +795,12 @@ fn frame(output_base_path: &Path, title: &str, inner: Markup) -> Markup {
 
                 footer {
                     div .socials {
-                        @for social in &socials {
+                        @for social in &socials(output_base_path) {
                             a
                                 href=(social.link)
                                 title=(social.description.unwrap_or(&format!("Me on {}", social.name)))
                             {
-                                img src=(social.icon.path(&output_base_path)) {}
+                                img src=(social.icon.path(output_base_path)) {}
                             }
                         }
                     }
@@ -335,453 +969,6 @@ fn render_landing_page(output_base_path: &Path) {
 fn render_skills_page(output_base_path: &Path) {
     let directory = output_base_path.join("skills");
     std::fs::create_dir_all(&directory).unwrap();
-
-    enum TechLevel {
-        Pro,
-        Normal,
-    }
-
-    impl fmt::Display for TechLevel {
-        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-            write!(
-                f,
-                "{}",
-                match self {
-                    Self::Pro => "pro",
-                    Self::Normal => "normal",
-                }
-            )
-        }
-    }
-
-    struct Technology {
-        name: &'static str,
-        level: TechLevel,
-        icon: Icon,
-    }
-
-    struct Category {
-        name: &'static str,
-        technologies: Vec<Technology>,
-    }
-
-    let categories = vec![
-        Category {
-            name: "Containerization",
-            technologies: vec![
-                Technology {
-                    name: "Kubernetes",
-                    level: TechLevel::Pro,
-                    icon: Icon::Kubernetes,
-                },
-                Technology {
-                    name: "Docker",
-                    level: TechLevel::Pro,
-                    icon: Icon::Docker,
-                },
-                Technology {
-                    name: "cri-o",
-                    level: TechLevel::Normal,
-                    icon: Icon::CriO,
-                },
-                Technology {
-                    name: "Containerd",
-                    level: TechLevel::Normal,
-                    icon: Icon::Containerd,
-                },
-                Technology {
-                    name: "OCI",
-                    level: TechLevel::Normal,
-                    icon: Icon::Oci,
-                },
-                Technology {
-                    name: "Rancher",
-                    level: TechLevel::Normal,
-                    icon: Icon::Rancher,
-                },
-            ],
-        },
-        Category {
-            name: "Databases",
-            technologies: vec![
-                Technology {
-                    name: "PostgreSQL",
-                    level: TechLevel::Pro,
-                    icon: Icon::Postgresql,
-                },
-                Technology {
-                    name: "ElasticSearch",
-                    level: TechLevel::Pro,
-                    icon: Icon::Elasticsearch,
-                },
-                Technology {
-                    name: "MySQL",
-                    level: TechLevel::Pro,
-                    icon: Icon::Mysql,
-                },
-                Technology {
-                    name: "Redis",
-                    level: TechLevel::Normal,
-                    icon: Icon::Redis,
-                },
-                Technology {
-                    name: "InfluxDB",
-                    level: TechLevel::Normal,
-                    icon: Icon::Influx,
-                },
-                Technology {
-                    name: "SQLite",
-                    level: TechLevel::Normal,
-                    icon: Icon::Sqlite,
-                },
-            ],
-        },
-        Category {
-            name: "Configuration Management",
-            technologies: vec![
-                Technology {
-                    name: "Terraform",
-                    level: TechLevel::Pro,
-                    icon: Icon::Terraform,
-                },
-                Technology {
-                    name: "Ansible",
-                    level: TechLevel::Pro,
-                    icon: Icon::Ansible,
-                },
-                Technology {
-                    name: "Pulumi",
-                    level: TechLevel::Pro,
-                    icon: Icon::Pulumi,
-                },
-                Technology {
-                    name: "Packer",
-                    level: TechLevel::Normal,
-                    icon: Icon::Packer,
-                },
-                Technology {
-                    name: "Puppet",
-                    level: TechLevel::Normal,
-                    icon: Icon::Puppet,
-                },
-                Technology {
-                    name: "SaltStack",
-                    level: TechLevel::Normal,
-                    icon: Icon::Saltstack,
-                },
-            ],
-        },
-        Category {
-            name: "Web Development",
-            technologies: vec![
-                Technology {
-                    name: "HTML",
-                    level: TechLevel::Pro,
-                    icon: Icon::Html5,
-                },
-                Technology {
-                    name: "CCS",
-                    level: TechLevel::Pro,
-                    icon: Icon::Css,
-                },
-                Technology {
-                    name: "JavaScript",
-                    level: TechLevel::Normal,
-                    icon: Icon::Javascript,
-                },
-                Technology {
-                    name: "Flask",
-                    level: TechLevel::Normal,
-                    icon: Icon::Flask,
-                },
-                Technology {
-                    name: "Svelte",
-                    level: TechLevel::Normal,
-                    icon: Icon::Svelte,
-                },
-                Technology {
-                    name: "ReactJS",
-                    level: TechLevel::Normal,
-                    icon: Icon::Reactjs,
-                },
-            ],
-        },
-        Category {
-            name: "Programming",
-            technologies: vec![
-                Technology {
-                    name: "Python",
-                    level: TechLevel::Pro,
-                    icon: Icon::Python,
-                },
-                Technology {
-                    name: "Rust",
-                    level: TechLevel::Pro,
-                    icon: Icon::Rust,
-                },
-                Technology {
-                    name: "Go",
-                    level: TechLevel::Pro,
-                    icon: Icon::Go,
-                },
-                Technology {
-                    name: "TypeScript",
-                    level: TechLevel::Normal,
-                    icon: Icon::Typescript,
-                },
-                Technology {
-                    name: "Bash",
-                    level: TechLevel::Normal,
-                    icon: Icon::Bash,
-                },
-                Technology {
-                    name: "C",
-                    level: TechLevel::Normal,
-                    icon: Icon::C,
-                },
-            ],
-        },
-        Category {
-            name: "Observability",
-            technologies: vec![
-                Technology {
-                    name: "Prometheus",
-                    level: TechLevel::Pro,
-                    icon: Icon::Prometheus,
-                },
-                Technology {
-                    name: "Grafana",
-                    level: TechLevel::Pro,
-                    icon: Icon::Grafana,
-                },
-                Technology {
-                    name: "Kibana",
-                    level: TechLevel::Normal,
-                    icon: Icon::Kibana,
-                },
-                Technology {
-                    name: "OpsGenie",
-                    level: TechLevel::Normal,
-                    icon: Icon::Opsgenie,
-                },
-                Technology {
-                    name: "OpenTelemetry",
-                    level: TechLevel::Normal,
-                    icon: Icon::Opentelemetry,
-                },
-                Technology {
-                    name: "Jaeger",
-                    level: TechLevel::Normal,
-                    icon: Icon::Jaeger,
-                },
-            ],
-        },
-        Category {
-            name: "Development",
-            technologies: vec![
-                Technology {
-                    name: "Git",
-                    level: TechLevel::Pro,
-                    icon: Icon::Git,
-                },
-                Technology {
-                    name: "Neovim",
-                    level: TechLevel::Pro,
-                    icon: Icon::Neovim,
-                },
-                Technology {
-                    name: "GitLab",
-                    level: TechLevel::Normal,
-                    icon: Icon::Gitlab,
-                },
-                Technology {
-                    name: "GitHub",
-                    level: TechLevel::Normal,
-                    icon: Icon::Github,
-                },
-                Technology {
-                    name: "OpenAPI",
-                    level: TechLevel::Normal,
-                    icon: Icon::Swagger,
-                },
-                Technology {
-                    name: "Jira",
-                    level: TechLevel::Normal,
-                    icon: Icon::Jira,
-                },
-            ],
-        },
-        Category {
-            name: "Automation",
-            technologies: vec![
-                Technology {
-                    name: "Drone",
-                    level: TechLevel::Pro,
-                    icon: Icon::Drone,
-                },
-                Technology {
-                    name: "GitLab CI",
-                    level: TechLevel::Pro,
-                    icon: Icon::Gitlab,
-                },
-                Technology {
-                    name: "Jenkins",
-                    level: TechLevel::Normal,
-                    icon: Icon::Jenkins,
-                },
-            ],
-        },
-        Category {
-            name: "Cloud Providers",
-            technologies: vec![
-                Technology {
-                    name: "AWS",
-                    level: TechLevel::Pro,
-                    icon: Icon::Aws,
-                },
-                Technology {
-                    name: "DigitalOcean",
-                    level: TechLevel::Normal,
-                    icon: Icon::Digitalocean,
-                },
-                Technology {
-                    name: "Hetzner",
-                    level: TechLevel::Normal,
-                    icon: Icon::Hetzner,
-                },
-            ],
-        },
-        Category {
-            name: "Web Servers",
-            technologies: vec![
-                Technology {
-                    name: "Nginx",
-                    level: TechLevel::Pro,
-                    icon: Icon::Nginx,
-                },
-                Technology {
-                    name: "Apache",
-                    level: TechLevel::Normal,
-                    icon: Icon::Apache,
-                },
-                Technology {
-                    name: "HAProxy",
-                    level: TechLevel::Normal,
-                    icon: Icon::Haproxy,
-                },
-                Technology {
-                    name: "OpenResty",
-                    level: TechLevel::Normal,
-                    icon: Icon::Openresty,
-                },
-            ],
-        },
-        Category {
-            name: "Operating Systems",
-            technologies: vec![
-                Technology {
-                    name: "CentOS",
-                    level: TechLevel::Pro,
-                    icon: Icon::Centos,
-                },
-                Technology {
-                    name: "Debian",
-                    level: TechLevel::Pro,
-                    icon: Icon::Debian,
-                },
-                Technology {
-                    name: "Arch Linux",
-                    level: TechLevel::Pro,
-                    icon: Icon::ArchLinux,
-                },
-                Technology {
-                    name: "Ubuntu",
-                    level: TechLevel::Normal,
-                    icon: Icon::Ubuntu,
-                },
-                Technology {
-                    name: "Fedora",
-                    level: TechLevel::Normal,
-                    icon: Icon::Fedora,
-                },
-                Technology {
-                    name: "FreeBSD",
-                    level: TechLevel::Normal,
-                    icon: Icon::Freebsd,
-                },
-            ],
-        },
-        Category {
-            name: "Security",
-            technologies: vec![
-                Technology {
-                    name: "Keycloak",
-                    level: TechLevel::Pro,
-                    icon: Icon::Keycloak,
-                },
-                Technology {
-                    name: "OpenID Connect",
-                    level: TechLevel::Pro,
-                    icon: Icon::OpenidConnect,
-                },
-                Technology {
-                    name: "GnuPG",
-                    level: TechLevel::Normal,
-                    icon: Icon::Gnupg,
-                },
-                Technology {
-                    name: "Let's Encrypt",
-                    level: TechLevel::Normal,
-                    icon: Icon::Letsencrypt,
-                },
-                Technology {
-                    name: "Wireshark",
-                    level: TechLevel::Normal,
-                    icon: Icon::Wireshark,
-                },
-                Technology {
-                    name: "OpenVPN",
-                    level: TechLevel::Normal,
-                    icon: Icon::Openvpn,
-                },
-            ],
-        },
-        Category {
-            name: "Virtualization",
-            technologies: vec![
-                Technology {
-                    name: "Libvirt / KVM",
-                    level: TechLevel::Pro,
-                    icon: Icon::Libvirt,
-                },
-                Technology {
-                    name: "Vagrant",
-                    level: TechLevel::Pro,
-                    icon: Icon::Vagrant,
-                },
-                Technology {
-                    name: "Qemu",
-                    level: TechLevel::Normal,
-                    icon: Icon::Qemu,
-                },
-            ],
-        },
-        Category {
-            name: "Storage",
-            technologies: vec![
-                Technology {
-                    name: "Ceph",
-                    level: TechLevel::Pro,
-                    icon: Icon::Ceph,
-                },
-                Technology {
-                    name: "ZFS",
-                    level: TechLevel::Normal,
-                    icon: Icon::Openzfs,
-                },
-            ],
-        },
-    ];
 
     let path = directory.join("index.html");
 
@@ -957,7 +1144,7 @@ fn render_skills_page(output_base_path: &Path) {
                 h1 { "Technologies" }
                 hr;
                 div {
-                    @for category in categories {
+                    @for category in tech_categories() {
                         section .block {
                             div .name {
                                 h1 { (category.name) }
@@ -966,7 +1153,7 @@ fn render_skills_page(output_base_path: &Path) {
                                 div {
                                     @for tech in category.technologies {
                                         div .tech data-tech-level={(tech.level)} {
-                                            img src=(tech.icon.path(&output_base_path)) {}
+                                            img src=(tech.icon.path(output_base_path)) {}
                                             span { (tech.name) }
                                         }
                                     }
@@ -1012,10 +1199,10 @@ fn main() {
     render_landing_page(&output_base_path);
     render_skills_page(&output_base_path);
 
-    let icons = icon::IconsUnverified::verify_all(if cfg!(debug_assertions) {
-        icon::UnusedIconFiles::Allow
+    let icons = IconsUnverified::verify_all(if cfg!(debug_assertions) {
+        UnusedIconFiles::Allow
     } else {
-        icon::UnusedIconFiles::Deny
+        UnusedIconFiles::Deny
     });
 
     std::fs::copy("./static/reset.css", output_base_path.join("reset.css")).unwrap();
