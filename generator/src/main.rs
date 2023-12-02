@@ -99,6 +99,7 @@ fn frame(title: &str, inner: Markup, input_path: &Path) -> Markup {
                 title { (title) }
                 link rel="stylesheet" href="/reset.css" {}
                 link rel="stylesheet" href="/style.css" {}
+                link rel="icon" href="/favicon.svg"
                 script src="https://unpkg.com/htmx.org@1.9.9" {}
                 meta name="viewport" content="width=device-width, initial-scale=1.0" {}
             }
@@ -381,6 +382,7 @@ fn main() {
 
     pages.push(copy(&rendered_output_directory, "reset.css", &input_path));
     pages.push(copy(&rendered_output_directory, "style.css", &input_path));
+    pages.push(copy(&rendered_output_directory, "favicon.svg", &input_path));
 
     pages.append(
         &mut fs::copy_dir_all(
