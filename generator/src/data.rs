@@ -510,3 +510,314 @@ pub fn tech_categories(input_path: &Path) -> Vec<TechCategory> {
         },
     ]
 }
+
+pub enum ProjectFigure {
+    Icon(Box<dyn Icon>),
+    Picture(&'static str),
+}
+
+pub struct ProjectTags {
+    pub languages: Vec<&'static str>,
+    pub tech: Vec<&'static str>,
+}
+
+pub struct ProjectLinks {
+    pub github: &'static str,
+    pub homepage: Option<&'static str>,
+}
+
+pub struct Project {
+    pub title: &'static str,
+    pub figure: Option<ProjectFigure>,
+    pub description: Vec<&'static str>,
+    pub tags: ProjectTags,
+    pub links: ProjectLinks,
+}
+
+pub struct ContributionProject {
+    pub title: &'static str,
+    pub figure: Option<ProjectFigure>,
+    pub contributions: Vec<&'static str>,
+    pub tags: ProjectTags,
+    pub links: ProjectLinks,
+}
+
+pub fn projects(input_path: &Path) -> Vec<Project> {
+    vec![
+        Project {
+            title: "git-repo-manager",
+            figure: Some(ProjectFigure::Icon(icon!("Git", input_path))),
+            description: vec!["A command-line tool to manage local git repositories"],
+            tags: ProjectTags {
+                languages: vec!["Rust"],
+                tech: vec!["Libgit2", "Toml"],
+            },
+            links: ProjectLinks {
+                github: "https://github.com/hakoerber/git-repo-manager",
+                homepage: Some("https://hakoerber.github.io/git-repo-manager/"),
+            },
+        },
+        Project {
+            title: "prometheus-restic-backblaze",
+            figure: Some(ProjectFigure::Icon(icon!("Backblaze", input_path))),
+            description: vec!["A prometheus exporter that reports restic backup ages for Backblaze"],
+            tags: ProjectTags {
+                languages: vec!["Python"],
+                tech: vec!["Prometheus", "Restic"],
+            },
+            links: ProjectLinks {
+                github: "https://github.com/hakoerber/prometheus-restic-backblaze",
+                homepage: Some("https://github.com/hakoerber/prometheus-restic-backblaze"),
+            },
+        },
+        Project {
+            title: "virt-bootstrap",
+            figure: None,
+            description: vec!["A script that bootstraps a new libvirt VM using cobbler"],
+            tags: ProjectTags {
+                languages: vec!["Python"],
+                tech: vec!["Libvirt", "Cobbler"],
+            },
+            links: ProjectLinks {
+                github: "https://github.com/hakoerber/virt-bootstrap",
+                homepage: None,
+            },
+        },
+        Project {
+            title: "aws-glacier-backup",
+            figure: Some(ProjectFigure::Icon(icon!("AwsS3", input_path))),
+            description: vec!["A bash script that uploads gzip’ed, gpg encrypted backups to AWS glacier"],
+            tags: ProjectTags {
+                languages: vec!["Bash"],
+                tech: vec!["AWS S3", "GPG"],
+            },
+            links: ProjectLinks {
+                github: "https://github.com/hakoerber/aws-glacier-backup",
+                homepage: None,
+            },
+        },
+        Project {
+            title: "guitar-practice",
+            figure: Some(ProjectFigure::Picture("/assets/images/guitar-closeup.jpg")),
+            description: vec![concat!(
+                "A simple python script that gives me a series of guitar chords ",
+                "to practice chord transitions, with customizable rate of change"
+            )],
+            tags: ProjectTags {
+                languages: vec!["Python"],
+                tech: vec![],
+            },
+            links: ProjectLinks {
+                github: "https://github.com/hakoerber/guitar-practice",
+                homepage: None,
+            },
+        },
+        Project {
+            title: "checkconn",
+            figure: None,
+            description:
+                vec!["Utiliy that continuously monitors the internet connection and reports downtimes"],
+            tags: ProjectTags {
+                languages: vec!["Bash"],
+                tech: vec![],
+            },
+            links: ProjectLinks {
+                github: "https://github.com/hakoerber/checkconn",
+                homepage: None,
+            },
+        },
+        Project {
+            title: "packager",
+            figure: None,
+            description: vec![concat!(
+                "A learning project that can be used to manage packing lists for ",
+                "trips, considering duration, weather and other factors."
+            ), "I mainly wrote this to play around with Flask and Elm"],
+            tags: ProjectTags {
+                languages: vec!["Rust", "Python", "Elm", "Javascript", "Svelte"],
+                tech: vec!["HTMX", "Flask", "SQlite"],
+            },
+            links: ProjectLinks {
+                github: "https://github.com/hakoerber/packager",
+                homepage: None,
+            },
+        },
+        Project {
+            title: "salt-nginx-letsencrypt",
+            figure: Some(ProjectFigure::Icon(icon!("Letsencrypt", input_path))),
+            description: vec!["A SaltStack nginx formula that also enables automated letsencrypt certificate management"],
+            tags: ProjectTags {
+                languages: vec!["Python"],
+                tech: vec!["SaltStack", "LetsEncrypt", "Nginx"],
+            },
+            links: ProjectLinks {
+                github: "https://github.com/hakoerber/salt-nginx-letsencrypt",
+                homepage: None,
+            },
+        },
+        Project {
+            title: "ansible-roles",
+            figure: Some(ProjectFigure::Icon(icon!("Ansible", input_path))),
+            description: vec!["A collection of ansible roles, e.g. for libvirt, networking, OpenVPN"],
+            tags: ProjectTags {
+                languages: vec!["YAML"],
+                tech: vec!["Ansible"],
+            },
+            links: ProjectLinks {
+                github: "https://github.com/hakoerber/ansible-roles",
+                homepage: None,
+            },
+        },
+        Project {
+            title: "salt-states",
+            figure: Some(ProjectFigure::Icon(icon!("Saltstack", input_path))),
+            description: vec![
+                concat!(
+                    "A big collection of saltstack states that I used for my ",
+                    "homelab."),
+                concat!("It contains configuration for a bunch of different ",
+                    "services, e.g. elasticsearch, dovecot, grafana, influxdb, jenkins, ",
+                    "kibana, nginx, owncloud, postgresql, ssh and a lot of others."
+                )],
+            tags: ProjectTags {
+                languages: vec!["YAML", "Jinja2"],
+                tech: vec!["SaltStack"],
+            },
+            links: ProjectLinks {
+                github: "https://github.com/hakoerber/salt-states",
+                homepage: None,
+            },
+        },
+        Project {
+            title: "wifiqr",
+            figure: Some(ProjectFigure::Picture("/assets/images/qrcode-example.png")),
+            description: vec!["A script that generates QR codes for easy WiFi access"],
+            tags: ProjectTags {
+                languages: vec!["Bash"],
+                tech: vec![],
+            },
+            links: ProjectLinks {
+                github: "https://github.com/hakoerber/wifiqr",
+                homepage: None,
+            },
+        },
+        Project {
+            title: "syncrepo",
+            figure: None,
+            description: vec![concat!(
+                "A python script to create and maintain a local YUM/DNF package ",
+                "repository for CentOS."),
+            concat!("Can be used to keep a mirror up to date with ",
+                "<code>cron(8)</code>.")],
+            tags: ProjectTags {
+                languages: vec!["Python"],
+                tech: vec!["DNF"],
+            },
+            links: ProjectLinks {
+                github: "https://github.com/hakoerber/syncrepo",
+                homepage: None,
+            },
+        },
+    ]
+}
+
+pub fn contribution_projects(input_path: &Path) -> Vec<ContributionProject> {
+    vec![
+        ContributionProject {
+            title: "Prometheus Node Exporter",
+            figure: Some(ProjectFigure::Icon(icon!("Prometheus", input_path))),
+            contributions: vec![
+                "Add label to NFS metrics containing the NFS protocol (<code>tcp/udp</code>)",
+            ],
+
+            tags: ProjectTags {
+                languages: vec!["Go"],
+                tech: vec!["Prometheus", "NFS"],
+            },
+            links: ProjectLinks {
+                github: "https://github.com/prometheus/node_exporter",
+                homepage: None,
+            },
+        },
+        ContributionProject {
+            title: "Kubespray",
+            figure: Some(ProjectFigure::Icon(icon!("Kubernetes", input_path))),
+            contributions: vec![
+                "Fix issues with continuous regeneration of etcd TLS cerificates",
+                "Fix incorrect directory mode for etcd TLS certificates",
+            ],
+
+            tags: ProjectTags {
+                languages: vec!["YAML"],
+                tech: vec!["Kubernetes", "Ansible"],
+            },
+            links: ProjectLinks {
+                github: "https://github.com/kubernetes-sigs/kubespray/",
+                homepage: None,
+            },
+        },
+        ContributionProject {
+            title: "SaltStack",
+            figure: Some(ProjectFigure::Icon(icon!("Saltstack", input_path))),
+            contributions: vec![
+                "Expand the <code>firewalld</code> module for interfaces, sources, services and zones",
+                "Fix the reactor engine not being loaded when not explicitly configured",
+            ],
+            tags: ProjectTags {
+                languages: vec!["Python"],
+                tech: vec!["SaltStack", "Firewalld"],
+            },
+            links: ProjectLinks {
+                github: "https://github.com/saltstack/salt",
+                homepage: None,
+            },
+        },        
+        ContributionProject {
+            title: "Vagrant",
+            figure: Some(ProjectFigure::Icon(icon!("Vagrant", input_path))),
+            contributions: vec![
+                "Renew DHCP lease on hostname change for Debian guests",
+                "Fix hostname entry in <code>/etc/hosts</code> for Debian guests",
+            ],
+            tags: ProjectTags {
+                languages: vec!["Ruby"],
+                tech: vec!["Vagrant"],
+            },
+            links: ProjectLinks {
+                github: "https://github.com/hashicorp/vagrant",
+                homepage: None,
+            },
+        },
+        ContributionProject {
+            title: "Prometheus procfs",
+            figure: Some(ProjectFigure::Icon(icon!("Prometheus", input_path))),
+            contributions: vec![
+                "Add exporting of a new field containing the NFS protocol (required for the node exporter change)",
+                "Fix parsing of the <code>xprt</code> lines in <code>mountstats</code> to enable metric exports for UDP mounts",
+            ],
+            tags: ProjectTags {
+                languages: vec!["Go"],
+                tech: vec!["Prometheus", "NFS"],
+            },
+            links: ProjectLinks {
+                github: "https://github.com/prometheus/procfs",
+                homepage: None,
+            },
+        },
+        ContributionProject {
+            title: "The Lost Son",
+            figure: Some(ProjectFigure::Picture("/assets/images/lostson.jpg")),
+            contributions: vec![
+                "Our contribution to the Global Game Jam 2018!",
+            ],
+            tags: ProjectTags {
+                languages: vec!["Javascript"],
+                tech: vec!["Phaser"],
+            },
+            links: ProjectLinks {
+                github: "https://github.com/niklas-heer/the-lost-son",
+                homepage: None,
+            },
+        },
+    ]
+}

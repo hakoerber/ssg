@@ -9,7 +9,7 @@ build() {
 }
 
 detect_changes() {
-    inotifywait generator/src static/ --exclude static/style.css --event modify,move,create,delete,attrib
+    inotifywait generator/src static/ --event modify,move,create,delete,attrib
 }
 
 build

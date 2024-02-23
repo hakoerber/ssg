@@ -88,7 +88,7 @@ fn frame(title: &str, inner: Markup, input_path: &Path) -> Markup {
         },
         Page {
             name: "About Me",
-            link: "/about.html".into(),
+            link: "/about/index.html".into(),
         },
     ];
 
@@ -356,6 +356,14 @@ fn main() {
         &input_path,
     ));
     pages.append(&mut pages::SkillsPage::render(
+        &rendered_output_directory,
+        &input_path,
+    ));
+    pages.append(&mut pages::ProjectsPage::render(
+        &rendered_output_directory,
+        &input_path,
+    ));
+    pages.append(&mut pages::AboutPage::render(
         &rendered_output_directory,
         &input_path,
     ));

@@ -6,9 +6,14 @@
   --heading-base-size: 1.75em;
 }
 
+html, body {
+  height: 100%;
+}
+
 body {
   display: flex;
   flex-direction: column;
+  justify-content: flex-start;
   gap: 4em;
   font-family: sans;
 
@@ -59,10 +64,197 @@ body {
     }
   }
 
+  & #projects, #aboutme {
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: auto;
+  }
+
+  & #aboutme {
+    width: 80%;
+    max-width: 1050px;
+    @media (max-width: 1050px) {
+      width: 90%;
+    }
+    display: flex;
+    flex-direction: column;
+    gap: 1cm;
+
+    &>h1 {
+      font-size: 2em;
+      text-align: center;
+    }
+
+    &>hr {
+      width: 100%;
+
+      height: 0px;
+      border: none;
+      border-bottom: 1px solid lightgray;
+    }
+    
+  }
+
+  & #projects {
+    width: 90%;
+    --gap: 40px;
+
+    display: flex;
+    flex-direction: row;
+    gap: var(--gap);
+
+    @media (max-width: 1050px) {
+      flex-direction: column;
+    }
+    
+    & #ownprojects, #contributions {
+      line-height: 1.4;
+
+      flex-basis: 0;
+      flex-grow: 1;
+      flex-shrink: 1;
+
+      display: flex;
+      flex-direction: column;
+      gap: 1cm;
+
+      &>h1 {
+        font-size: 2em;
+        text-align: center;
+      }
+
+      &>hr {
+        width: 100%;
+
+        height: 0px;
+        border: none;
+        border-bottom: 1px solid lightgray;
+      }
+
+      &>.list {
+        --border-radius: 8px;
+        --shadow: 0em 0.5em 1em -0.2em rgba(10, 10, 10, .1), 0 0 0 1px rgba(10, 10, 10, .01);
+
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+
+        &>.project {
+          border: 1px solid lightgray;
+          border-radius: var(--border-radius);
+          padding: 20px;
+
+          display: flex;
+          flex-direction: column;
+          gap: 30px;
+
+          &>.header {
+            font-weight: bold;
+            align-self: center;
+          }
+
+          &>img {
+            height: 80px;
+            align-self: center;
+          }
+
+          &>.description, .contributions {
+            align-self: center;
+            flex-grow: 1;
+
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+
+            & code {
+              border: 1px solid lightgray;
+              font-family: monospace;
+              font-size: 1.2em;
+            }
+          }
+
+          &> .contributions {
+            &>ul {
+              list-style-type: square;
+              list-style-position: inside;
+              display: flex;
+              flex-direction: column;
+              gap: 1em;
+            }
+          }
+
+          &>.tags {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            gap: 10px;
+
+            font-size: smaller;
+
+            &>.tag {
+              display: flex;
+              flex-direction: row;
+
+              &>.k, .v {
+                padding: 5px;
+              }
+
+              &>.k {
+                background-color: #363636;
+                color: white;
+              }
+            }
+
+            &>.tag.language {
+              &>.k::before {
+                content: "language"
+              }
+
+              &> .v {
+                background-color: #3298dc;
+                color: white;
+              }
+            }
+
+            &>.tag.tech {
+              &>.k::before {
+                content: "tech"
+              }
+
+              &> .v {
+                background-color: #48c774;
+                color: black;
+              }
+            }
+          }
+
+          &>.links {
+            display: flex;
+            flex-direction: row;
+
+            &>div {
+              flex-basis: 0;
+              flex-grow: 1;
+              flex-shrink: 1;
+
+              display: flex;
+              flex-direction: row;
+              gap: 10px;
+              align-items: center;
+
+              &>img {
+                height: 20px;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
   & #skills {
     --border-radius: 8px;
     --shadow: 0em 0.5em 1em -0.2em rgba(10, 10, 10, .1), 0 0 0 1px rgba(10, 10, 10, .01);
-
 
     width: 90%;
     margin: auto;
@@ -362,10 +554,10 @@ header {
 
 footer {
   --icon-size: 30px;
-  --padding: 10px;
+  --icon-padding: 10px;
   --border: 1px;
 
-  padding: var(--padding) 30px var(--padding) 30px;
+  padding: 20px;
 
   display: flex;
   flex-direction: row;
@@ -379,7 +571,7 @@ footer {
 
     & a {
       height: auto;
-      padding: var(--padding);
+      padding: var(--icon-padding);
       font-size: 1.5em;
       color: black;
       border: solid lightgray var(--border);
@@ -401,8 +593,8 @@ footer {
     align-items: center;
 
     & img {
-      height: calc(var(--icon-size) + 2 * var(--padding) + 2 * var(--border));
-      width: calc(var(--icon-size) + 2 * var(--padding) + 2 * var(--border));
+      height: calc(var(--icon-size) + 2 * var(--icon-padding) + 2 * var(--border));
+      width: calc(var(--icon-size) + 2 * var(--icon-padding) + 2 * var(--border));
     }
   }
 
@@ -447,20 +639,46 @@ footer {
     gap: 40px;
 
     & .summary {
-      font-style: italic;
       line-height: 1.6;
+      color: dimgray;
     }
 
     & .summary,
     & .date {
       display: flex;
       align-items: center;
-
+      color: dimgray;
     }
   }
 }
 
-#blogpost .content {
+#aboutme .with-picture {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  gap: 30px;
+
+  & figure {
+    & img {
+      float: right;
+    }
+
+    & figcaption {
+      font-size: small;
+      color: gray;
+    }
+  }
+}
+
+#aboutme .picture-right {
+  flex-direction: row-reverse;
+}
+
+#aboutme .picture-left {
+  flex-direction: row;
+}
+
+#blogpost .content, #aboutme .content {
   display: flex;
   flex-direction: column;
   gap: 20px;
@@ -546,15 +764,6 @@ footer {
     display: flex;
     flex-direction: column;
     gap: 1em;
-
-    & li {
-      display: flex;
-      flex-direction: column;
-    }
-
-    & li::marker {
-      content: "x";
-    }
   }
 
   & pre[lang]::before {
@@ -569,6 +778,12 @@ footer {
 
   & pre[lang=rust]::before {
     content: "Rust";
+  }
+
+  & .buzzword {
+    font-variant: small-caps;
+    font-weight: 600;
+    color: crimson;
   }
 }
 
