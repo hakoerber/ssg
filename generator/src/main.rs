@@ -219,6 +219,7 @@ fn render_blogposts(output_base_path: &Path, input_path: &Path) -> Vec<Page> {
                 let mut builder = comrak::ExtensionOptionsBuilder::default();
                 builder.header_ids(None);
                 builder.table(true);
+                builder.footnotes(true);
                 builder.build().unwrap()
             },
             ..Default::default()

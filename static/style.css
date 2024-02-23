@@ -817,6 +817,16 @@ footer {
     }
   }
 
+  & .footnote-ref {
+    vertical-align: super;
+    font-size: small;
+  }
+
+  & .footnotes {
+    border-top: 1px solid lightgray;
+    padding-top: 1em;
+  }
+
   & pre[lang]::before {
     float: right;
     color: gray;
