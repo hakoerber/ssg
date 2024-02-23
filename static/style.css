@@ -624,7 +624,6 @@ footer {
   flex-direction: column;
   gap: 70px;
   font-family: serif;
-
 }
 
 #blogpost .header {
@@ -825,6 +824,12 @@ footer {
   & .footnotes {
     border-top: 1px solid lightgray;
     padding-top: 1em;
+  }
+
+  & blockquote {
+    border-left: 1px solid lightgray;
+    padding-left: 1em;
+    margin-left: 1em;
   }
 
   & pre[lang]::before {
