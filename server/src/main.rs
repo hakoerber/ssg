@@ -1,5 +1,7 @@
 use axum::{
     http::{StatusCode, Uri},
+    response::Redirect,
+    routing::get,
     serve, Router,
 };
 
@@ -47,6 +49,7 @@ async fn main() {
 
     let app = Router::new()
         .merge(router::router())
+        .merge(Router::new().route("/", get(|| async { Redirect::temporary("/index.html") })))
         .fallback(|uri: Uri| async move { (StatusCode::NOT_FOUND, format!("No route for {uri}")) });
 
     let listener = tokio::net::TcpListener::bind((IpAddr::from([0, 0, 0, 0]), port))
