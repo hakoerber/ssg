@@ -58,7 +58,7 @@ impl Render for SkillsPage {
                     hr;
                     div {
                         div .column {
-                            section {
+                            section .area style="background-color:#effaf3;" {
                                 h1 {
                                     img src=(icon!("CloudDownload", input_path).output_path()) {}
                                     span { "Cloud & Migrations" }
@@ -89,7 +89,7 @@ impl Render for SkillsPage {
                                 }
                             }
 
-                            section {
+                            section .area style="background-color:#feecf0;" {
                                 h1 {
                                     img src=(icon!("MagnifyingGlass", input_path).output_path()) {}
                                     span { "Monitoring & Alerting" }
@@ -116,7 +116,7 @@ impl Render for SkillsPage {
                         }
 
                         div .column {
-                            section {
+                            section .area style="background-color:#eef6fc;" {
                                 h1 {
                                     img src=(icon!("Network", input_path).output_path()) {}
                                     span { "DevOps Architecture" }
@@ -160,7 +160,7 @@ impl Render for SkillsPage {
                         }
 
                         div .column {
-                            section {
+                            section .area style="background-color:#fffbeb;" {
                                 h1 {
                                     img src=(icon!("Shield", input_path).output_path()) {}
                                     span { "Security" }
@@ -188,7 +188,7 @@ impl Render for SkillsPage {
                                     }
                                 }
                             }
-                            section {
+                            section .area style="background-color:#effaf3;" {
                                 h1 {
                                     img src=(icon!("Gears", input_path).output_path()) {}
                                     span { "Automation" }
@@ -451,55 +451,75 @@ impl Render for AboutPage {
 
                     h2 { "Sports"}
 
-                    p { "For a physical hobby, I do not have a single one or even one I focus on, but I do numerous different things. Quantity over quality if you want:"}
-
-
-                    ul {
-                        li { span .buzzword {"Cycling"} ", from multi-day Bike touring to Mountain biking and some (very) mild Downhill. I bought a new bike mid of 2020 (a Radon Skeen Trail AL 2020, see picture), a mountain bike that has to fill all those roles in one"}
-
-                        li { span .buzzword {"Hiking"} " and " span .buzzword {"Mountaineering"}}
-
-                        li { span .buzzword {"Kayaking"} }
-
-                        li {"Climbing, both " span .buzzword {"Boudering"} " and " span .buzzword {"Rock climbing"}
+                    div .with-pictures .pictures-right {
+                        div .pictures {
+                            figure {
+                                img width="200px" src="/assets/images/nebelhorn.jpg" {}
+                                figcaption {"Nebelhorn, Oberstdorf, February 2020"}
+                            }
+                            figure {
+                                img width="300px" src="/assets/images/kayak-naab.jpg" {}
+                                figcaption {"Naab, Schwandorf, September 2020"}
+                            }
                         }
+                        div .content {
+                            p { "For a physical hobby, I do not have a single one or even one I focus on, but I do numerous different things. Quantity over quality if you want:"}
 
-                        li { span .buzzword {"Weightlifting"} }
 
-                        li { span .buzzword {"Running"} }
-                    }
+                            ul {
+                                li { span .buzzword {"Cycling"} ", from multi-day Bike touring to Mountain biking and some (very) mild Downhill. I bought a new bike mid of 2020 (a Radon Skeen Trail AL 2020, see picture), a mountain bike that has to fill all those roles in one"}
 
-                    p {
-                        "I started my climbing journey in 2022. I had been bouldering "
-                        "a bit the years before, but in 2022 I started bouldering more "
-                        "seriously. At some point, my brother took me to an indoor sports "
-                        "climbing gym. Shortly afterwards, I took belaying and lead climbing "
-                        "classes with the DAV (\"Deutscher Alpenverein\", German Alpine Club). "
-                        "From there, it kind of snowballed and now I am bouldering and sport "
-                        "climbing, both indoor and outdoors. I even dabbed into alpine climbing and "
-                        "ice climbing."
+                                li { span .buzzword {"Hiking"} " and " span .buzzword {"Mountaineering"}}
+
+                                li { span .buzzword {"Kayaking"} }
+
+                                li {"Climbing, both " span .buzzword {"Boudering"} " and " span .buzzword {"Rock climbing"}
+                                }
+
+                                li { span .buzzword {"Weightlifting"} }
+
+                                li { span .buzzword {"Running"} }
+                            }
+
+                            p {
+                                "I started climbing seriously in 2022. I had been bouldering "
+                                "a bit the years before, but in 2022 I started bouldering more "
+                                "seriously. At some point, my brother took me to an indoor sports "
+                                "climbing gym. Shortly afterwards, I took belaying and lead climbing "
+                                "classes with the DAV (\"Deutscher Alpenverein\", German Alpine Club). "
+                                "From there, it kind of snowballed and now I am bouldering and sport "
+                                "climbing, both indoor and outdoors. I even dabbed into alpine climbing and "
+                                "ice climbing."
+                            }
+                        }
                     }
 
                     h2 {"Creativity"}
 
-                    p {(PreEscaped("The last kind of hobby&mdash;the creative one&mdash;is the one I have to force myself to do the most."))}
-
-                    div .with-picture .picture-right {
-                        figure {
-                            img width="400px" src="/assets/images/guitar.jpg" {}
-                            figcaption {"Amsterdam, July 2019"}
+                    div .with-pictures .pictures-right {
+                        div .pictures {
+                            figure {
+                                img width="300px" src="/assets/images/guitar.jpg" {}
+                                figcaption {"Amsterdam, July 2019"}
+                            }
                         }
-                        p {
-                            "I have been learning playing " span .buzzword {"Guitar"} " since mid of 2019. I'm using "
-                            a href="https://www.justinguitar.com/" {"JustinGuitar's course"}
-                            " to get to know the basics. It's enough for some simple strumming, but don't expect any concerts right now. My goal is do be campfire-ready."
+                        div .content {
+                            p {(PreEscaped("The last kind of hobby&mdash;the creative one&mdash;is the one I have to force myself to do the most."))}
+
+                            p {
+                                "I have been learning playing " span .buzzword {"Guitar"} " since mid of 2019. I'm using "
+                                a href="https://www.justinguitar.com/" {"JustinGuitar's course"}
+                                " to get to know the basics. It's enough for some simple strumming, but don't expect any concerts right now. My goal is do be campfire-ready."
+                            }
                         }
                     }
 
-                    div .with-picture .picture-right {
-                        figure {
-                            img width="360px" src="/assets/images/yamaha-p45.jpg" {}
-                            figcaption {"Yamaha P-45"}
+                    div .with-pictures .pictures-right {
+                        div .pictures {
+                            figure {
+                                img width="260px" src="/assets/images/yamaha-p45.jpg" {}
+                                figcaption {"Yamaha P-45"}
+                            }
                         }
                         div .content {
                             p {
@@ -516,9 +536,11 @@ impl Render for AboutPage {
                         "I also started attending a local church choir to work on my " span .buzzword {"Singing"} ", but with the COVID-19 situation this is currently not possible. Maybe that's better for everyone, because no one has to listen to me sing. ;)"
                     }
 
-                    div .with-picture .picture-right {
-                        figure {
-                            img width="200px" src="/assets/images/chess.jpg" {}
+                    div .with-pictures .pictures-right {
+                        div .pictures {
+                            figure {
+                                img width="200px" src="/assets/images/chess.jpg" {}
+                            }
                         }
 
                         div .content {

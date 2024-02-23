@@ -106,6 +106,14 @@ body {
     @media (max-width: 1050px) {
       flex-direction: column;
     }
+
+    & #ownprojects > .list > .project {
+      background-color: #effaf3;
+    }
+
+    & #contributions > .list > .project {
+      background-color: #eef6fc;
+    }
     
     & #ownprojects, #contributions {
       line-height: 1.4;
@@ -137,6 +145,10 @@ body {
 
         display: grid;
         grid-template-columns: 1fr 1fr;
+        @media (max-width: 800px) {
+          grid-template-columns: 1fr;
+        }
+
         gap: 20px;
 
         &>.project {
@@ -652,29 +664,41 @@ footer {
   }
 }
 
-#aboutme .with-picture {
+#aboutme .with-pictures {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
-  gap: 30px;
+  gap: 4em;
 
-  & figure {
-    & img {
-      float: right;
-    }
+  &>.pictures {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2em;
 
-    & figcaption {
-      font-size: small;
-      color: gray;
+    & figure {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.2em;
+
+      & img {
+        float: right;
+      }
+
+      & figcaption {
+        font-size: small;
+        color: gray;
+      }
     }
   }
 }
 
-#aboutme .picture-right {
+#aboutme .pictures-right {
   flex-direction: row-reverse;
 }
 
-#aboutme .picture-left {
+#aboutme .pictures-left {
   flex-direction: row;
 }
 
