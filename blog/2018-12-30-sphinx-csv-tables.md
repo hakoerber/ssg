@@ -11,7 +11,7 @@ I am quite fond of [Sphinx](http://www.sphinx-doc.org/en/master/), a documentati
 
 One thing I do not like about Sphinx is its table syntax[^1]:
 
-[^1]: Taken from http://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html#tables --- retrieved 2018-12-30
+[^1]: Taken from <http://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html#tables> &mdash; retrieved 2018-12-30
 
 ```rst
 +------------------------+------------+----------+----------+
@@ -28,7 +28,7 @@ In my experience, it is very tedious to write and maintain. The rationale behind
 
 In contrast to that, Markdown has the following syntax for tables[^2]:
 
-[^2]: Taken from https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet --- retrieved 2018-12-30
+[^2]: Taken from <https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet> &mdash; retrieved 2018-12-30
 
 ```markdown
 | Tables        | Are           | Cool  |

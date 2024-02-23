@@ -31,7 +31,7 @@ All fields are explained in the link above. The crux is the following part[^quot
 
 > For the udp RPC transport there is no connection count, connect idle time, or idle time (fields #3, #4, and #5); all other fields are the same.
 
-[^quote1]: [Link](https://utcc.utoronto.ca/%7Ecks/space/blog/linux/NFSMountstatsXprt) --- retrieved 2018-12-10
+[^quote1]: [Link](https://utcc.utoronto.ca/%7Ecks/space/blog/linux/NFSMountstatsXprt) &mdash; retrieved 2018-12-10
 
 This means that for UDP, the line contains three fewer fields than for TCP. The mountstats exporter always expects the same number of fields and therefore breaks for UDP.
 
