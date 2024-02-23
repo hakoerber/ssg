@@ -783,10 +783,23 @@ footer {
   & ul,
   & ol {
     list-style-type: square;
-    list-style-position: inside;
-    display: flex;
     flex-direction: column;
+    display: flex;
     gap: 1em;
+
+    & li::marker {
+      vertical-align: middle;
+    }
+
+    & li {
+      margin-left: 1em;
+      display: list-item;
+
+      & > p {
+        margin-left: 0.5em;
+        display: inline block;
+      }
+    }
   }
 
   & table {
