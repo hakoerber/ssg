@@ -128,7 +128,7 @@ fn frame(title: &str, inner: Markup, input_path: &Path) -> Markup {
 
                 footer {
                     div .socials {
-                        @for social in &data::socials(&input_path) {
+                        @for social in &data::socials(input_path) {
                             a
                                 href=(social.link)
                                 title=(social.description.unwrap_or(&format!("Me on {}", social.name)))
@@ -242,7 +242,7 @@ fn render_blogposts(output_base_path: &Path, input_path: &Path) -> Vec<Page> {
             }
         );
 
-        let output = frame(&frontmatter.title, inner, &input_path).into_string();
+        let output = frame(&frontmatter.title, inner, input_path).into_string();
 
         let mut path = path.clone();
         assert!(path.set_extension("html"));
@@ -294,7 +294,7 @@ fn render_blogposts(output_base_path: &Path, input_path: &Path) -> Vec<Page> {
     let output = frame("Blog posts", inner, input_path);
 
     let output_path = &out.as_path().join(index);
-    render::render_into(output, &output_path);
+    render::render_into(output, output_path);
 
     pages.push(Page {
         path: Path::new(dir).join(index).to_str().unwrap().to_owned(),

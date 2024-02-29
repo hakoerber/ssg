@@ -125,7 +125,7 @@ fn main() {
     let manifest: Manifest =
         serde_json::from_str(&fs::read_to_string(&manifest_path).unwrap()).unwrap();
 
-    write_router(&build_directory.as_ref(), &manifest);
+    write_router(build_directory.as_ref(), &manifest);
 
     // this will always rebuild, as the manifest will be rewritten by the generator call above, so it will be changed
     // on every run. this could be optimized by checking the *content* of manifest (and writing checksums in there),

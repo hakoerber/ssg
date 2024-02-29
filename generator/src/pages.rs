@@ -223,7 +223,7 @@ impl Render for SkillsPage {
                     h1 { "Technologies" }
                     hr;
                     div {
-                        @for category in data::tech_categories(&input_path) {
+                        @for category in data::tech_categories(input_path) {
                             section .block {
                                 div .name {
                                     h1 { (category.name) }
