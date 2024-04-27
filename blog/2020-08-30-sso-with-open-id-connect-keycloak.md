@@ -232,7 +232,7 @@ According to the Miniflux documentation, "Only google is supported" as an OAuth 
 
 I struggled a bit with the callback URL: At first, I set the path in `OAUTH2_REDIRECT_URL` to something generic like `/oauth2/keycloak/callback`. This led to a redirect loop after authentication. The browser was redirected to `/oauth2/keycloak/callback`, which started a new authentication flow, which in the end again redirected to `/oauth2/keycloak/callback` and so on. Miniflux did not properly detect that the redirect URL was the redirect URL, and started a new authentication flow every single time. So, what was the correct value to set for `OAUTH2_REDIRECT_URL` to make Miniflux detect the redirect? I had to dive into the source code ...
 
-[^miniflux-man-page]: https://miniflux.app/miniflux.1.html
+[^miniflux-man-page]: <https://miniflux.app/miniflux.1.html>
 
 In the logs, I only got the following message:
 
@@ -242,7 +242,7 @@ In the logs, I only got the following message:
 
 This error can only be caused at a single place in the code, at `oauth2/manager.go`[^miniflux-code-manager]
 
-[^miniflux-code-manager]: https://github.com/miniflux/miniflux/blob/3e1e0b604fb42eba4617d77a164cca37d4cae1aa/oauth2/manager.go#L24
+[^miniflux-code-manager]: <https://github.com/miniflux/miniflux/blob/3e1e0b604fb42eba4617d77a164cca37d4cae1aa/oauth2/manager.go#L24>
 
 ```go
 // Provider returns the given provider.
@@ -257,7 +257,7 @@ func (m *Manager) Provider(name string) (Provider, error) {
 
 This method looks for a new provider in the `m.providers` map of a `Manager` object with a certain name. The `Manager` object and its providers are initialized just a few lines further down[^miniflux-code-manager-2]:
 
-[^miniflux-code-manager-2]: https://github.com/miniflux/miniflux/blob/3e1e0b604fb42eba4617d77a164cca37d4cae1aa/oauth2/manager.go#L32
+[^miniflux-code-manager-2]: <https://github.com/miniflux/miniflux/blob/3e1e0b604fb42eba4617d77a164cca37d4cae1aa/oauth2/manager.go#L32>
 
 ```go
 // NewManager returns a new Manager.
@@ -287,7 +287,7 @@ We see that the key in the `providers` map is `oidc`. So why is it not found? Wh
 
 It turns out that the name is actually extracted from the URL path. The callback request is handled in a method called `oauth2Redirect()` in `ui/oauth2_callback.go`[^miniflux-code-redirect]
 
-[^miniflux-code-redirect]: https://github.com/miniflux/miniflux/blob/master/ui/oauth2_redirect.go#L27
+[^miniflux-code-redirect]: <https://github.com/miniflux/miniflux/blob/master/ui/oauth2_redirect.go#L27>
 
 Here is the call to `Provider()`:
 
@@ -309,7 +309,7 @@ func (h *handler) oauth2Redirect(w http.ResponseWriter, r *http.Request) {
 
 The `oauth2Redirect()` method is called by the Go HTTP Router according to the following handler, found in `ui/ui.go`[^miniflux-code-router]:
 
-[^miniflux-code-router]: https://github.com/miniflux/miniflux/blob/master/ui/ui.go#L133
+[^miniflux-code-router]: <https://github.com/miniflux/miniflux/blob/master/ui/ui.go#L133>
 
 ```go
 uiRouter.HandleFunc("/oauth2/{provider}/redirect", handler.oauth2Redirect).Name("oauth2Redirect").Methods(http.MethodGet)
