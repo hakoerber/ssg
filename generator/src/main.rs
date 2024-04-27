@@ -51,6 +51,7 @@ struct Manifest {
     pages: Vec<Page>,
 }
 
+#[allow(dead_code)]
 #[derive(Deserialize, Clone)]
 struct Tag(String);
 
