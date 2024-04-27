@@ -771,7 +771,7 @@ pub fn contribution_projects(input_path: &Path) -> Vec<ContributionProject> {
                 github: "https://github.com/saltstack/salt",
                 homepage: None,
             },
-        },        
+        },
         ContributionProject {
             title: "Vagrant",
             figure: Some(ProjectFigure::Icon(icon!("Vagrant", input_path))),

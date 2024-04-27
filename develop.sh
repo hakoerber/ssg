@@ -13,7 +13,7 @@ detect_changes() {
 }
 
 build
-while detect_changes ; do 
+while detect_changes ; do
   build
 done &
 generator_pid=$!
@@ -29,7 +29,7 @@ terminate() {
 trap terminate EXIT
 
 wait $generator_pid $server_pid
-wait 
+wait
 
 
 
